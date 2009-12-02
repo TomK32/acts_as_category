@@ -140,7 +140,11 @@ module ActiveRecord
             #  where_permitted(true) #=> " AND (NOT hidden) " # whenver @@permissions is empty
             def self.where_permitted(with_and = false)
               id_addon = (class_variable_get :@@permissions).size == 0 ? '' : " OR id IN (\#{(class_variable_get :@@permissions).join(',')})"
-              "\#{with_and ? ' AND' : ''} (#{configuration[:hidden]} IS NULL OR #{configuration[:hidden]}=0\#{id_addon}) "
+              if(self.respond_to?(:#{configuration[:hidden]}))
+                "\#{with_and ? ' AND' : ''} (#{configuration[:hidden]} IS NULL OR #{configuration[:hidden]}=0\#{id_addon}) "
+              else
+                id_addon
+              end
             end
             
             # Returns the +category+ to a given +id+. This is as a replacement for find(id), but it respects permitted/hidden categories.
